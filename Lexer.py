@@ -3,12 +3,10 @@ import ply.lex as lex
 tokens = (
     'COEFF',
     'VARIABLE',
-    'OPERATOR',
 )
 
-t_COEFF = r'([\d]+)(?=[A-Za-z])'
+t_COEFF = r'([\+\-\*\/])(\s?)(\d)(\.?\d?)'
 t_VARIABLE = r'(\w{1}\d{1})'
-t_OPERATOR = r'[+,-,*,/]'
 t_ignore = ' \t'
 
 def t_newline(t):
@@ -24,9 +22,4 @@ lexerData = ""
 lexer = lex.lex()
 lexer.input(lexerData)
 
-
-# while True:
-#     tok = lexer.token()
-#     if not tok:
-#         break
-#     print(tok)
+###################################################################################################################
