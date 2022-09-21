@@ -8,7 +8,7 @@ tokens = (
     'GARBAGE',
 )
 
-t_COEFF = r'([\+\-\*\/])(\s?)(\d)(\.?\d?)'
+t_COEFF = r'([\+\-\*\/])(\s?)(\d?)(\.?\d?)'
 t_VARIABLE = r'(\w{1}\d{1})'
 t_BOUND = r'((?<=.)(<=|>=))'
 t_RESTRICTION = r'((?<=(<=|>=)\s)\d+)'
