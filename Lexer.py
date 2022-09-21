@@ -3,10 +3,14 @@ import ply.lex as lex
 tokens = (
     'COEFF',
     'VARIABLE',
+    "BOUND",
+    'RESTRICTION',
 )
 
 t_COEFF = r'([\+\-\*\/])(\s?)(\d)(\.?\d?)'
 t_VARIABLE = r'(\w{1}\d{1})'
+t_BOUND = r'((?<=.)(<=|>=))'
+t_RESTRICTION = r'((?<=(<=|>=)\s)\d+)'
 t_ignore = ' \t'
 
 def t_newline(t):
