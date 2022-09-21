@@ -1,15 +1,36 @@
 import Lexer
-
-class Item:
+class MathExpression:
     variable = ""
     coeff = ""
 
+class MathRestriction:
+    restriction = ""
+    type = ""
 
-def parse_equation(equation):
+class Equation:
+    # Lista para MathExpressions
+    restrictionsList = []
     dictionary = []
 
+    def insertExpression(self, item):
+        self.dictionary.insert(len(self.dictionary), item)
+
+    def insertRestriction(self, item):
+        self.restrictionsList.insert(len(self.restrictionsList), item)
+
+    def printEquation(self):
+        print("\nMath expression:")
+        for factor in self.dictionary:
+            print("\tCoeff: {}, Variable: {}".format(factor.coeff, factor.variable))
+        print("\nRestrictions:")
+        for rest in self.restrictionsList:
+            print("\tRestriction Type: {}, Restriction: {}".format(rest.type, rest.restriction))
+
+#######################################################################################################################
+def parse_equation(equation):
     Lexer.lexer.input(equation)
-    thisItem = Item()
+    thisEquation = Equation()
+    thisItem = MathExpression()
 
     while True:
         tok = Lexer.lexer.token()
@@ -18,40 +39,36 @@ def parse_equation(equation):
             break
         if (tok.type == "COEFF"):
             thisItem.coeff = tok.value
+            thisItem.coeff = thisItem.coeff.replace(' ', '')
         elif (tok.type == "VARIABLE"):
             thisItem.variable = tok.value
-            dictionary.insert(len(dictionary), thisItem)
-            thisItem = Item()
+            thisEquation.insertExpression(thisItem)
+            thisItem = MathExpression()
 
-    return dictionary
+    return thisEquation
 
 def parse_restriction(restriction):
-    bound = ""
+    thisEquation = parse_equation(restriction)
+
     Lexer.lexer.input(restriction)
-    thisItem = Item()
+    thisRestriction = MathRestriction()
 
     while True:
         tok = Lexer.lexer.token()
         if not tok:
             break
         if (tok.type == "BOUND"):
-            thisItem.bound = tok.value
-            bound = thisItem.bound
+            thisRestriction.type = tok.value
+            bound = thisRestriction.type
         if (tok.type == "RESTRICTION"):
-            thisItem.restriction = tok.value
-            restriction = thisItem.restriction
-            thisItem = Item()
-    dict = parse_equation("-3.8x1 + 5x2 -2x3")
-    for x in dict:
-        print("{} : {}, ".format(x.variable, x.coeff), end = " ")
-    if (bound == "<="):
-        print("Upper bound")
-    elif(bound == ">="):
-        print("Lower bound")
-    print("Restriction: ", restriction)
-    return restriction
+            thisRestriction.restriction = tok.value
 
-str = parse_restriction("-3.8x1 + 5x2 - 2x3 <= 35")
+            thisEquation.insertRestriction(thisRestriction)
+            thisRestriction = MathRestriction()
+
+    return thisEquation
+
+parse_restriction("-3.8x1 + 5x2 - 2x3 <= 35").printEquation()
 
 
 
