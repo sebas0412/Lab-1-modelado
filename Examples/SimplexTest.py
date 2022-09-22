@@ -268,6 +268,8 @@ matrix = generateMatrix(2, 3)
 constrain(matrix, '1,1,L,7')
 constrain(matrix, '4,10,L,40')
 constrain(matrix, '10,0,G,30')
-
 objective(matrix, '30,100,0')
+
+np.set_printoptions(suppress=True)
+print(matrix)
 print(maximize(matrix))
