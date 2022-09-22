@@ -4,7 +4,7 @@ import ply.lex as lex
 import ply.yacc as yacc
 from Clases import Equation, MathExpression, MathRestriction
 
-equation = Equation()
+thisEquation = Equation()
 
 tokens = (
     'STARTING_COEFF',
@@ -23,7 +23,7 @@ tokens = (
 )
 
 t_STARTING_COEFF = r'^[\+\-\*\/]?\s?[0-9]+(?=(\w\d))'
-t_STARTING_COEFF_EMPTY = r'^[\+\-\*\/]?\s?(?=([A-Za-z][0-9]))'
+t_STARTING_COEFF_EMPTY = r'(?=[A-Za-z])'
 t_NORMAL_COEFF = r'[\+\-\*\/]\s?([0-9]+)(?=([A-Za-z][0-9]))'
 t_EMPTY_COEFF = r'[\+\-\*\/]\s?(?=([A-Za-z][0-9]))'
 t_FRACTION_COEFF = r'[\+\-\*\/]?\s?([0-9]+\.[0-9]+)(?=([A-Za-z][0-9]))'
@@ -51,9 +51,10 @@ def p_error(t):
 def p_equation(t):
     '''equation :   expression BOUND RESTRICTION
                 |   expression'''
+    global thisEquation
     try:
-        equation.restriction.type = t[2]
-        equation.restriction.value = t[3]
+        thisEquation.restriction.type = t[2]
+        thisEquation.restriction.value = t[3]
     except:
         print("This equation presents no restriction")
 def p_expression(t):
@@ -67,18 +68,25 @@ def p_factor(t):
                 |   emptycoeff VARIABLE
                 |   fractioncoeff VARIABLE
                 |   STARTING_VARIABLE'''
+    global thisEquation
     try:
         item = MathExpression()
         item.coeff = t[1]
+        item.coeff = item.coeff.replace(' ', '')
+
+        if (item.coeff == "+"):
+            item.coeff = "1"
+        elif (item.coeff == "-"):
+            item.coeff = "-1"
+
         item.variable = t[2]
-        equation.insertExpression(item)
+        thisEquation.insertExpression(item)
         t[0] = t[1] + t[2]
     except:
-        print("DASDAS")
         item = MathExpression()
         item.coeff = "1"
         item.variable = t[1]
-        equation.insertExpression(item)
+        thisEquation.insertExpression(item)
         t[0] = t[1]
 
 
@@ -104,8 +112,9 @@ def p_fractioncoeff(t):
 
 
 def plyParse(data):
+    global thisEquation
+    thisEquation = Equation()
     lexer = lex.lex()
     parser = yacc.yacc()
-    equation = Equation()
     parser.parse(data)
-    return equation
+    return thisEquation

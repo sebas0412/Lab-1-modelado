@@ -10,6 +10,10 @@ class Equation:
     # Lista para MathExpressions
     restriction = MathRestriction()
     dictionary = []
+    def __init__(self):
+        self.dictionary = []
+        self.restriction = MathRestriction()
+
 
     def insertExpression(self, item):
         self.dictionary.insert(len(self.dictionary), item)
@@ -18,5 +22,5 @@ class Equation:
         print("\nMath expression:")
         for factor in self.dictionary:
             print("\tCoeff: {}, Variable: {}".format(factor.coeff, factor.variable))
-        print("\nRestriction:")
-        print("\tRestriction Type: {}, Restriction: {}".format(self.restriction.type, self.restriction.value))
+        print("Restriction:")
+        print("\tRestriction Type: {}, Restriction: {}\n".format(self.restriction.type, self.restriction.value))

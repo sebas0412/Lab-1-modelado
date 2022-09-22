@@ -7,16 +7,18 @@ def parse_restriction(restriction):
 
 def parse_problem(objective,restrictions, maximize):
     restrictionList = []
-    eq = parse_equation(objective)
     for item in restrictions:
-        restrictionList.insert(0, parse_restriction(item))
+        restrictionList.insert(len(restrictionList), parse_restriction(item))
+    for item in restrictionList:
+        item.printEquation()
+
 
 
     tablaSimplex = [],[]
     varNames = []
 
 
-parse_problem("30x1 + 100x2", ["10x1 <= 10", "20x2 <= 20"], True)
+parse_problem("30x1 + 100x2", ["-x1 + x2 <= 7", "4x1 + 10x2 <= 40", "10x1 >= 30"], True)
 
 
 
