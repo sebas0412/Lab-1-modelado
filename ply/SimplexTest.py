@@ -17,10 +17,6 @@ def parseEquation(equation):
     return dictionary
 
 def parseRestriction(restriction):
-    # ["x1 + x2 <= 7",
-    #  "4x1 + 10x2 <= 40",
-    #  "10x1 >= 30"]
-    thisRest = ""
     restDictionary = {}
     greaterBound = False
 
@@ -39,7 +35,25 @@ def parseProblem(objective, restrictions, maximize):
     generateConstraints(matrix, restrictions)
     generateObjectiveFunction(matrix, parsedObjective)
 
-    print("dasdsasda")
+    simplex(matrix, maximize)
+
+def simplex(matrix, boolMaximize):
+    if boolMaximize == True:
+        print(maximize(matrix))
+    else:
+        print(minimize(matrix))
+
+def simplex_solver(objective, restrictions, maximize):
+    parseProblem(objective, restrictions, maximize)
+
+
+
+
+
+
+
+
+
 
 def obtainRestrictions(matrix, equation):
     restrictionDictionaries = []
@@ -64,14 +78,14 @@ def obtainRestrictions(matrix, equation):
             tempDict = restrictionDictionaries[index]
 
             if (greaterBounds[index] == True):
-                restrictions[index][j] = (float(tempDict["x{}".format(j + 1)]) * -1)
+                restrictions[index][j] = (float(tempDict["x{}".format(j + 1)]))
             else:
-                restrictions[index][j] = float(tempDict["x{}".format(j + 1)])
+                restrictions[index][j] = (float(tempDict["x{}".format(j + 1)]) * -1)
 
-        if (greaterBounds[index == True]):
-            restrictions[index][cols - 1] = float(values[index]) * -1
-        else:
+        if (greaterBounds[index] == True):
             restrictions[index][cols - 1] = float(values[index])
+        else:
+            restrictions[index][cols - 1] = float(values[index]) * -1
 
     return restrictions
 
@@ -100,6 +114,9 @@ def findNegatives_columns(table):
     lc = len(table[0, :])
     minimum = min(table[:-1, lc - 1])
 
+    if minimum == -0.0000000:
+        minimum = 0
+
     if minimum <= 0:
         index = np.where(table[:-1, lc - 1] == minimum)[0][0]
     else:
@@ -118,7 +135,7 @@ def findNegatives_rows(table):
     return index
 
 
-def locatePivot_rows(table):
+def locatePivot(table):
     total = []
     r = findNegatives_columns(table)
     row = table[r, :-1]
@@ -130,12 +147,12 @@ def locatePivot_rows(table):
         if i ** 2 > 0 and b / i > 0:
             total.append(b / i)
         else:
-            total.append(10000)
+            total.append(50000)
     index = total.index(min(total))
     return [index, c]
 
 
-def locatePivot_columns(table):
+def locatePivot_bottomRow(table):
     if nextRound_rows(table):
         total = []
         r = findNegatives_rows(table)
@@ -155,9 +172,15 @@ def pivot(row, col, table):
     tempTable = np.zeros((length_rows, length_cols))
     pr = table[row, :]
 
+
     if table[row, col] ** 2 > 0:
         e = 1 / table[row, col]
         r = pr * e
+
+        for item in r:
+            if (item == -0.0):
+                item = 0.0
+
         for i in range(len(table[:, col])):
             k = table[i, :]
             c = table[i, col]
@@ -228,6 +251,7 @@ def generateConstraints(table, equation):
         lengthRows = len(table[:, 0])
         var = lengthCols - lengthRows - 1
         j = 0
+        colCounter = 0
         equation = obtainRestrictions(table, equation)
 
         for i in range (0, len(equation[:, 0])):
@@ -247,11 +271,10 @@ def generateConstraints(table, equation):
                 row[j] = equation[i][j]
                 j += 1
             row[-1] = equation[i][-1]
-            row[var + j] = 1
+            row[var + colCounter] = 1
+            colCounter += 1
     else:
         print('Cannot add another constraint.')
-
-    print(table)
 
 
 # Verifica si es posible agregar la funcion objetivo
@@ -273,25 +296,30 @@ def addObjectiveFunction(table):
 
 def generateObjectiveFunction(table, equation):
     if addObjectiveFunction(table) == True:
-        equation = [float(i) for i in equation.split(',')]
+        equationArray = []
+
+        for item in equation.keys():
+            equationArray.append(float(equation[item]))
+        equationArray.append(0.0)
+
         lr = len(table[:, 0])
         row = table[lr - 1, :]
         i = 0
 
-        while i < len(equation) - 1:
-            row[i] = equation[i] * -1
+        while i < len(equationArray) - 1:
+            row[i] = equationArray[i] * -1
             i += 1
         row[-2] = 1
-        row[-1] = equation[-1]
+        row[-1] = equationArray[-1]
     else:
         print('You must finish adding constraints before the objective function can be added.')
 
 
 def maximize(table):
     while nextRound_columns(table) == True:
-        table = pivot(locatePivot_rows(table)[0], locatePivot_rows(table)[1], table)
+        table = pivot(locatePivot(table)[0], locatePivot(table)[1], table)
     while nextRound_rows(table) == True:
-        table = pivot(locatePivot_columns(table)[0], locatePivot_columns(table)[1], table)
+        table = pivot(locatePivot_bottomRow(table)[0], locatePivot_bottomRow(table)[1], table)
 
     lengthColumns = len(table[0, :])
     lengthRows = len(table[:, 0])
@@ -301,10 +329,10 @@ def maximize(table):
 
     for i in range(var):
         column = table[:, i]
-        colSum = sum(column)
+        columnSum = sum(column)
         maximum = max(column)
 
-        if float(colSum) == float(maximum):
+        if float(columnSum) == float(maximum):
             loc = np.where(column == maximum)[0][0]
             val[generateVariables(table)[i]] = table[loc, -1]
         else:
@@ -316,9 +344,9 @@ def maximize(table):
 def minimize(table):
     table = convert_minimization(table)
     while nextRound_columns(table) == True:
-        table = pivot(locatePivot_rows(table)[0], locatePivot_rows(table)[1], table)
+        table = pivot(locatePivot(table)[0], locatePivot(table)[1], table)
     while nextRound_rows(table) == True:
-        table = pivot(locatePivot_columns(table)[0], locatePivot_columns(table)[1], table)
+        table = pivot(locatePivot_bottomRow(table)[0], locatePivot_bottomRow(table)[1], table)
 
     lengthCols = len(table[0, :])
     lengthRows = len(table[:, 0])
@@ -328,20 +356,21 @@ def minimize(table):
 
     for i in range(var):
         column = table[:, i]
-        colSums = sum(column)
+        columnSum = sum(column)
         maximum = max(column)
 
-        if float(colSums) == float(maximum):
+        if float(columnSum) == float(maximum):
             loc = np.where(column == maximum)[0][0]
             val[generateVariables(table)[i]] = table[loc, -1]
         else:
             val[generateVariables(table)[i]] = 0
-            val['min'] = table[-1, -1] * -1
+    val['min'] = table[-1, -1] * -1
     return val
 
 
-# m = generateMatrix(2, 2)
-#  print(obtainRestrictions(m, ["2x1 -x2 <= 10", "x1 + x2 >= 20"]))
-# constrain(m, ["2x1 -x2 <= 10", "x1 + x2 >= 20"])
-# print(maximize(m))
-parseProblem("30x1 + 100x2", ["x1 + x2 <= 7", "4x1 + 10x2 <= 40", "10x1 >= 30"], True)
+
+
+
+simplex_solver("0.65x1 + 0.45x2", ["2x1 + 3x2 <= 400", "3x1 + 1.5x2 <= 300", "x1 <= 90"], True)
+simplex_solver("30x1 + 100x2", ["x1 + x2 <= 7", "4x1 + 10x2 <= 40", "10x1 >= 30"], True)
+simplex_solver("3x1 + 8x2", ["x1 + 4x2 >= 3.5" , "x1 + 2x2 >= 2.5"], False)

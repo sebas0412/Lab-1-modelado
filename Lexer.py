@@ -31,7 +31,7 @@ t_FRACTION_COEFF = r'[\+\-\*\/]?\s?([0-9]+\.[0-9]+)(?=([A-Za-z][0-9]))'
 t_VARIABLE = r'([A-Za-z][0-9])'
 t_STARTING_VARIABLE = r'^([A-Za-z][0-9])'
 t_BOUND = r'((?<=.)(<=|>=))'
-t_RESTRICTION = r'((?<=(<=|>=)\s)\d+)'
+t_RESTRICTION = r'((?<=(<=|>=)\s)\d+)(\.\d+)?'
 t_GARBAGE = r'.+'
 t_ignore = ' \t'
 
