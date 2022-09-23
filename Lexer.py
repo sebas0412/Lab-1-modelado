@@ -74,7 +74,8 @@ def p_factor(t):
                 |   normalcoeff VARIABLE
                 |   emptycoeff VARIABLE
                 |   fractioncoeff VARIABLE
-                |   STARTING_VARIABLE'''
+                |   STARTING_VARIABLE
+                | '''
     global thisEquation
     try:
         item = MathExpression()
@@ -85,6 +86,8 @@ def p_factor(t):
             item.coeff = "1"
         elif (item.coeff == "-"):
             item.coeff = "-1"
+        else:
+            item.coeff = item.coeff.replace('+', '')
 
         item.variable = t[2]
         thisEquation.insertExpression(item)

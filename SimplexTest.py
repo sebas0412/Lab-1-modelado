@@ -1,10 +1,81 @@
 import numpy as np
 
+import Lexer
+
 
 # Se crea una tabla vacia, con suficientes filas y columnas para abarcar las variables y restricciones
 def generateMatrix(variables, constraints):
     table = np.zeros((constraints + 1, variables + constraints + 2))
     return table
+
+def parseEquation(equation):
+    thisEquation = Lexer.plyParse(equation)
+    dictionary = {}
+
+    for item in thisEquation.dictionary:
+        dictionary[item.variable.replace('+', '')] = item.coeff
+    return dictionary
+
+def parseRestriction(restriction):
+    # ["x1 + x2 <= 7",
+    #  "4x1 + 10x2 <= 40",
+    #  "10x1 >= 30"]
+    thisRest = ""
+    restDictionary = {}
+    greaterBound = False
+
+    thisRest = Lexer.plyParse(restriction)
+
+    for rest in thisRest.dictionary:
+        restDictionary[rest.variable] = rest.coeff
+
+    if (thisRest.restriction.type == "<="):
+        greaterBound = True
+    return restDictionary, thisRest.restriction.value, greaterBound
+
+def parseProblem(objective, restrictions, maximize):
+    parsedObjective = parseEquation(objective)
+    matrix = generateMatrix(len(parsedObjective), len(restrictions))
+    generateConstraints(matrix, restrictions)
+    generateObjectiveFunction(matrix, parsedObjective)
+
+    print("dasdsasda")
+
+def obtainRestrictions(matrix, equation):
+    restrictionDictionaries = []
+    values = []
+    greaterBounds = []
+
+    for index in range(0, len(equation)):
+        temp1, temp2, temp3 = parseRestriction(equation[index])
+
+        restrictionDictionaries.insert(index, temp1)
+        values.insert(index, temp2)
+        greaterBounds.insert(index, temp3)
+
+    rows = len(equation)
+    cols = len(matrix[0, :]) - len(equation) - 1
+    restrictions = np.zeros((int(rows), int(cols)))
+
+    for index in range(0, len(equation)):
+        j = 0
+
+        for j in range(0, len(restrictionDictionaries[index])):
+            tempDict = restrictionDictionaries[index]
+
+            if (greaterBounds[index] == True):
+                restrictions[index][j] = (float(tempDict["x{}".format(j + 1)]) * -1)
+            else:
+                restrictions[index][j] = float(tempDict["x{}".format(j + 1)])
+
+        if (greaterBounds[index == True]):
+            restrictions[index][cols - 1] = float(values[index]) * -1
+        else:
+            restrictions[index][cols - 1] = float(values[index])
+
+    return restrictions
+
+
 
 
 # Revisan si se van a necesitar varios pivotes
@@ -130,6 +201,8 @@ def generateVariables(table):
     return varTable
 
 
+# Verifica si es posible agregar mas de una restriccion a la tabla, revisando
+# si hay espacio disponible
 def addConstraints(table):
     lengthRows = len(table[:, 0])
     empty = []
@@ -147,38 +220,41 @@ def addConstraints(table):
         return False
 
 
-#Utilizando la Tabla y la Ecuacion, se definen todas las restricciones y se crea una tabla
-#Del tamano apropiado
-def constrain(table, equation):
+# Utilizando la Tabla y la Ecuacion, se definen todas las restricciones y se crea una tabla
+# Del tamano apropiado
+def generateConstraints(table, equation):
     if addConstraints(table) == True:
         lengthCols = len(table[0, :])
         lengthRows = len(table[:, 0])
         var = lengthCols - lengthRows - 1
         j = 0
+        equation = obtainRestrictions(table, equation)
 
-        while j < lengthRows:
-            row_check = table[j, :]
-            total = 0
+        for i in range (0, len(equation[:, 0])):
+            while j < lengthRows:
+                row_check = table[i, :]
+                total = 0
 
-            for i in row_check:
-                total += float(i ** 2)
-            if total == 0:
-                row = row_check
-                break
-            j += 1
-        equation = convert(equation)
-        i = 0
+                for j in row_check:
+                    total += float(j ** 2)
+                if total == 0:
+                    row = row_check
+                    break
+                j += 1
+            j = 0
 
-        while i < len(equation) - 1:
-            row[i] = equation[i]
-            i += 1
-        row[-1] = equation[-1]
-        row[var + j] = 1
+            while j < len(equation[i]) - 1:
+                row[j] = equation[i][j]
+                j += 1
+            row[-1] = equation[i][-1]
+            row[var + j] = 1
     else:
         print('Cannot add another constraint.')
 
+    print(table)
 
-#Verifica si es posible agregar la funcion objetivo
+
+# Verifica si es posible agregar la funcion objetivo
 def addObjectiveFunction(table):
     lengthRows = len(table[:, 0])
     empty = []
@@ -195,7 +271,7 @@ def addObjectiveFunction(table):
         return False
 
 
-def objective(table, equation):
+def generateObjectiveFunction(table, equation):
     if addObjectiveFunction(table) == True:
         equation = [float(i) for i in equation.split(',')]
         lr = len(table[:, 0])
@@ -236,6 +312,7 @@ def maximize(table):
     val['max'] = table[-1, -1]
     return val
 
+
 def minimize(table):
     table = convert_minimization(table)
     while nextRound_columns(table) == True:
@@ -263,11 +340,8 @@ def minimize(table):
     return val
 
 
-matrix = generateMatrix(2, 3)
-
-constrain(matrix, '1,1,L,7')
-constrain(matrix, '4,10,L,40')
-constrain(matrix, '10,0,G,30')
-
-objective(matrix, '30,100,0')
-print(maximize(matrix))
+# m = generateMatrix(2, 2)
+#  print(obtainRestrictions(m, ["2x1 -x2 <= 10", "x1 + x2 >= 20"]))
+# constrain(m, ["2x1 -x2 <= 10", "x1 + x2 >= 20"])
+# print(maximize(m))
+parseProblem("30x1 + 100x2", ["x1 + x2 <= 7", "4x1 + 10x2 <= 40", "10x1 >= 30"], True)
