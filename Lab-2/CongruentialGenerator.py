@@ -1,11 +1,10 @@
 from math import sqrt
 
-def execute(a, b, m, x):
-    return get_period(a, b, m, x)
 
+########################### Metodos Principales #############################
 
 def good_abm(n):
-    m = n * 2
+    m = n * 2 + 1
     a = 1
     b = 0
 
@@ -14,33 +13,38 @@ def good_abm(n):
     m_primeFactors = [x for x in m_primes if m % x == 0]
 
     a = generate_a(m_primeFactors)
-    b = generate_b(m_primes, m)
+    b = generate_b(m_primes, n)
     b_multiples = find_multiples(b)
 
     return a, b, m
 
 
-def get_period(a, b, m, x):
-    results = []
-    currentSeed = x
-    results.append(currentSeed)
+########################### Metodos Auxiliares #############################
 
-    if(isPowerOfTwo(m)):
-        while (True):
+def get_period(a, b, m, x):
+    results = {}
+    resultsArray = []
+    currentSeed = x
+    results[currentSeed] = (currentSeed)
+
+    if isPowerOfTwo(m):
+        while True:
             currentSeed = executeGenerator_TwoPowK(a, b, m, currentSeed)
             for x in results:
                 if x == currentSeed:
-                    loop = False
-                    return results
-            results.append(currentSeed)
+                    resultsArray = [x for x in results]
+                    return resultsArray
+            results[currentSeed] = currentSeed
     else:
-        while (True):
+        while True:
             currentSeed = executeGenerator(a, b, m, currentSeed)
             for x in results:
                 if x == currentSeed:
-                    loop = False
-                    return results
-            results.append(currentSeed)
+                    resultsArray = [x for x in results]
+                    return resultsArray
+            results[currentSeed] = currentSeed
+
+
 
 def executeGenerator(a, b, m, seed):
     return (a * seed + b) % m
@@ -57,9 +61,7 @@ def generate_m(n):
     # while (m < n * 2):
     #     m = m * 2
     # return m
-
-    return n * 2
-
+    return n * 2 + 1
 
 def generate_a(primeFactors):
     a = 1
@@ -71,7 +73,7 @@ def generate_a(primeFactors):
 def generate_b(primes, m):
     b = 0
     for x in primes:
-        if (x > m / 2):
+        if x > (m / 2):
             b = x
             break
     return b
@@ -96,7 +98,7 @@ def isPrime(n):
         isPrime = False
     elif (n == 2):
         isPrime = True
-    elif (n % 2 == 0):
+    elif not(n & 1):
         isPrime = False
     else:
         root = sqrt(n)
@@ -132,10 +134,7 @@ def isPowerOfTwo(n):
     return 0
 
 print("start")
-a, b, m = good_abm(20)
-result = execute(a, b, m, 7)
-print(result)
-print(len(result))
-result.sort()
-print(result)
-print(len(result))
+a, b, m = good_abm(15000)
+period = get_period(a, b, m, 0)
+print(period)
+print(len(period))
