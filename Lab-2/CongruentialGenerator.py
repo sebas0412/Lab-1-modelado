@@ -4,7 +4,7 @@ from math import sqrt
 ########################### Metodos Principales #############################
 
 def good_abm(n):
-    m = n * 2 + 1
+    m = generate_m(n)
     a = 1
     b = 0
 
@@ -23,36 +23,34 @@ def good_abm(n):
 
 def get_period(a, b, m, x):
     results = {}
-    resultsArray = []
     currentSeed = x
-    results[currentSeed] = (currentSeed)
+    results[currentSeed] = currentSeed
 
     if isPowerOfTwo(m):
         while True:
             currentSeed = executeGenerator_TwoPowK(a, b, m, currentSeed)
-            for x in results:
-                if x == currentSeed:
-                    resultsArray = [x for x in results]
-                    return resultsArray
+            if currentSeed in results:
+                resultsArray = [x for x in results]
+                return resultsArray
             results[currentSeed] = currentSeed
     else:
         while True:
             currentSeed = executeGenerator(a, b, m, currentSeed)
-            for x in results:
-                if x == currentSeed:
-                    resultsArray = [x for x in results]
-                    return resultsArray
+            if currentSeed in results:
+                resultsArray = [x for x in results]
+                return resultsArray
             results[currentSeed] = currentSeed
-
 
 
 def executeGenerator(a, b, m, seed):
     return (a * seed + b) % m
 
+
 def executeGenerator_TwoPowK(a, b, m, seed):
     result = (a * seed + b)
-    new_m = m-1
+    new_m = m - 1
     return result & new_m
+
 
 def generate_m(n):
     # Si se desea que M sea potencia de 2
@@ -62,6 +60,7 @@ def generate_m(n):
     #     m = m * 2
     # return m
     return n * 2 + 1
+
 
 def generate_a(primeFactors):
     a = 1
@@ -94,17 +93,17 @@ def find_multiples(n):
 def isPrime(n):
     isPrime = True
 
-    if (n < 2):
+    if n < 2:
         isPrime = False
-    elif (n == 2):
+    elif n == 2:
         isPrime = True
-    elif not(n & 1):
+    elif not (n & 1):
         isPrime = False
     else:
         root = sqrt(n)
 
         for i in range(3, int(root) + 1, 2):
-            if (n % i == 0):
+            if n % i == 0:
                 isPrime = False
                 break
 
@@ -115,7 +114,7 @@ def generate_prime_array(n):
     array = [2]
 
     for i in range(3, n + 1, 2):
-        if (isPrime(i)):
+        if isPrime(i):
             array.append(i)
 
     return array
@@ -133,8 +132,9 @@ def isPowerOfTwo(n):
         return 1
     return 0
 
+
 print("start")
-a, b, m = good_abm(15000)
+a, b, m = good_abm(100)
 period = get_period(a, b, m, 0)
 print(period)
 print(len(period))
