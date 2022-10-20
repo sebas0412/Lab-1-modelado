@@ -1,3 +1,4 @@
+import cgi
 from math import sqrt
 from Card import Card
 import time
@@ -6,22 +7,35 @@ import numpy
 
 
 class CongruentialGenerator:
+    a,b,m = 0
+    generated = []
     ########################### Metodos Principales #############################
-    def init(self, a, b, m):
-        a = a
-        b = b
-        m = m
+    def __init__(self, a, b, m):
+        self.a = a
+        self.b = b
+        self.m = m
+
+        return
+
+    def generateTime():
         obj = time.gmtime(0)
         epoch = time.asctime(obj)
-        x = round(time.time() * 1000)
-        return x
-
+        time = round(time.time() * 1000)
+        return time
 
     def seed(self, s):
         random.seed(s)
-        print(random.random())
-        return
+        return random.random()
 
+    def random(self):
+        randomNumber = random.randint(16384,2147483646)
+        x = randomNumber & 16383
+        x = x/16384
+        print(x)
+        return x
+
+    def period(self):
+        return len(self.generated)
 
     def good_abm(self, n):
         m = self.generate_m(n)
@@ -36,6 +50,9 @@ class CongruentialGenerator:
         b = self.generate_b(m_primes, n)
         b_multiples = self.find_multiples(b)
 
+        self.a = a
+        self.b = b
+        self.m = m
         return a, b, m
 
     def compareHands(self, playerHand, opponentHand):
@@ -215,7 +232,7 @@ class CongruentialGenerator:
 
     ########################### Metodos Auxiliares #############################
 
-    def get_period(self, a, b, m, x):
+    def buildGenerator(self, a, b, m, x):
         results = {}
         currentSeed = x
         results[currentSeed] = currentSeed
@@ -225,6 +242,7 @@ class CongruentialGenerator:
                 currentSeed = self.executeGenerator_TwoPowK(a, b, m, currentSeed)
                 if currentSeed in results:
                     resultsArray = [x for x in results]
+                    self.generated = resultsArray
                     return resultsArray
                 results[currentSeed] = currentSeed
         else:
@@ -232,6 +250,7 @@ class CongruentialGenerator:
                 currentSeed = self.executeGenerator(a, b, m, currentSeed)
                 if currentSeed in results:
                     resultsArray = [x for x in results]
+                    self.generated = resultsArray
                     return resultsArray
                 results[currentSeed] = currentSeed
 
@@ -325,4 +344,3 @@ class CongruentialGenerator:
         if cnt == 1:
             return 1
         return 0
-
