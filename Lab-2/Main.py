@@ -1,4 +1,3 @@
-from CongruentialGenerator import CongruentialGenerator
 import random
 
 randomInit = random.randint(10000000,30000000)

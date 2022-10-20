@@ -38,17 +38,18 @@ class CongruentialGenerator:
         return len(self.generated)
 
     def good_abm(self, n):
-        m = self.generate_m(n)
+        m = self.generateM(n)
         a = 1
         b = 0
+        z = int(m / 3) * 2
 
-        m_primes = self.generate_prime_array(m)
-        m_multiples = self.find_multiples(m)
+        m_primes = self.generate_prime_array(z)
+        m_multiples = self.findMultiples(m)
         m_primeFactors = [x for x in m_primes if m % x == 0]
 
-        a = self.generate_a(m_primeFactors)
-        b = self.generate_b(m_primes, n)
-        b_multiples = self.find_multiples(b)
+        a = self.generateA(m_primeFactors)
+        b = self.generateB(m_primes, n)
+        b_multiples = self.findMultiples(b)
 
         self.a = a
         self.b = b
@@ -56,14 +57,85 @@ class CongruentialGenerator:
         return a, b, m
 
     def compareHands(self, playerHand, opponentHand):
-        print()
+        playerScore = 0
+        opponentScore = 0
+
+        if self.isStraightFlush(playerHand):
+            playerScore = 9
+        elif self.isFourOfAKind(playerHand):
+            playerScore = 8
+        elif self.isFullHouse(playerHand):
+            playerScore = 7
+        elif self.isFlush(playerHand):
+            playerScore = 6
+        elif self.isStraight(playerHand):
+            playerScore = 5
+        elif self.isThreeOfAKind(playerHand):
+            playerScore = 4
+        elif self.isTwoPairs(playerHand):
+            playerScore = 3
+        elif self.isPair(playerHand):
+            playerScore = 2
+        elif self.isHighCard(playerHand):
+            playerScore = 1
+
+        if self.isStraightFlush(opponentHand):
+            opponentScore = 9
+        elif self.isFourOfAKind(opponentHand):
+            opponentScore = 8
+        elif self.isFullHouse(opponentHand):
+            opponentScore = 7
+        elif self.isFlush(opponentHand):
+            opponentScore = 6
+        elif self.isStraight(opponentHand):
+            opponentScore = 5
+        elif self.isThreeOfAKind(opponentHand):
+            opponentScore = 4
+        elif self.isTwoPairs(opponentHand):
+            opponentScore = 3
+        elif self.isPair(opponentHand):
+            opponentScore = 2
+        elif self.isHighCard(opponentHand):
+            opponentScore = 1
+
+        if playerScore > opponentScore:
+            return "Gana Jugador"
+        elif opponentScore > playerScore:
+            return "Gana Oponente"
+        else:
+            player = []
+            opponent = []
+            playerTotal = 0
+            opponentTotal = 0
+            for x in playerHand:
+                playerTotal = playerTotal + x.value
+                player.append(x.value)
+            for y in opponentHand:
+                opponentTotal = opponentTotal + y.value
+                opponent.append(y.value)
+
+            player.sort()
+            opponent.sort()
+
+            # Compara la suma de todas las cartas
+            if playerTotal > opponentTotal:
+                return "Gana Jugador"
+            elif opponentTotal > playerTotal:
+                return "Gana Oponente"
+            else:
+                # Compara la carta mayor
+                if player[4] > opponent[4]:
+                    return "Gana Jugador"
+                elif opponent[4] > player[4]:
+                    return "Gana Oponente"
+                else:
+                    return "Empate"
 
 
     # Debe recibir dos arreglos de 5 'cartas' cada uno
     # 'carta' puede hacerse en una clase, para almacenar el valor y el palo de cada carta
     def compare_hands(self, player, opponent):
         print()
-
 
     ####################### Metodos Para Texas Hold'em #########################
     # Cada jugador posee 7 cartas en total: 2 privadas y 5 publicas
@@ -85,6 +157,7 @@ class CongruentialGenerator:
         for x in cardDeck:
             print(x)
 
+        self.shuffleArray(cardDeck)
         return cardDeck
 
     def shuffleArray(self, array):
@@ -95,12 +168,9 @@ class CongruentialGenerator:
             array[a] = array[b]
             array[b] = temp
 
-
-
     # Puntaje 9
     def isStraightFlush(self, playerHand):
         return self.isStraight(playerHand) and self.isFlush(playerHand)
-
 
     # Puntaje 8
     def isFourOfAKind(self, playerHand):
@@ -117,7 +187,6 @@ class CongruentialGenerator:
         else:
             return False
 
-
     # Puntaje 7
     def isFullHouse(self, playerHand):
         seen = {}
@@ -133,7 +202,6 @@ class CongruentialGenerator:
         else:
             return False
 
-
     # Puntaje 6
     def isFlush(self, playerHand):
         whatType = playerHand[0].type
@@ -143,7 +211,6 @@ class CongruentialGenerator:
                 return False
 
         return True
-
 
     # Puntaje 5
     def isStraight(self, playerHand):
@@ -170,7 +237,6 @@ class CongruentialGenerator:
 
         return result
 
-
     # Puntaje 4
     def isThreeOfAKind(self, playerHand):
         seen = {}
@@ -185,7 +251,6 @@ class CongruentialGenerator:
             return True
         else:
             return False
-
 
     # Puntaje 3
     def isTwoPairs(self, playerHand):
@@ -202,7 +267,6 @@ class CongruentialGenerator:
         else:
             return False
 
-
     # Puntaje 2
     def isPair(self, playerHand):
         seen = {}
@@ -218,7 +282,6 @@ class CongruentialGenerator:
         else:
             return False
 
-
     # Puntaje 1
     # Devuelve la carta con el valor mas alto
     def isHighCard(self, playerHand):
@@ -228,7 +291,6 @@ class CongruentialGenerator:
             if x.value > maxValue:
                 maxValue = x.value
         return maxValue
-
 
     ########################### Metodos Auxiliares #############################
 
@@ -254,35 +316,33 @@ class CongruentialGenerator:
                     return resultsArray
                 results[currentSeed] = currentSeed
 
-
     def executeGenerator(self, a, b, m, seed):
         return (a * seed + b) % m
-
 
     def executeGenerator_TwoPowK(self, a, b, m, seed):
         result = (a * seed + b)
         new_m = m - 1
         return result & new_m
 
-
-    def generate_m(self, n):
+    def generateM(self, n):
         # Si se desea que M sea potencia de 2
         # m = 16
         #
         # while (m < n * 2):
         #     m = m * 2
         # return m
-        return n * 2 + 1
+        if n & 1:
+            return n
+        else:
+            return n + 1
 
-
-    def generate_a(self, primeFactors):
+    def generateA(self, primeFactors):
         a = 1
         for x in primeFactors:
             a = a * x
         return a + 1
 
-
-    def generate_b(self, primes, m):
+    def generateB(self, primes, m):
         b = 0
         for x in primes:
             if x > (m / 2):
@@ -290,8 +350,7 @@ class CongruentialGenerator:
                 break
         return b
 
-
-    def find_multiples(self, n):
+    def findMultiples(self, n):
         multipleList = []
 
         for i in range(int(n / 2 + 1)):
@@ -301,7 +360,6 @@ class CongruentialGenerator:
             except:
                 continue
         return multipleList
-
 
     def isPrime(self, n):
         isPrime = True
@@ -322,7 +380,6 @@ class CongruentialGenerator:
 
         return isPrime
 
-
     def generate_prime_array(self, n):
         array = [2]
 
@@ -331,7 +388,6 @@ class CongruentialGenerator:
                 array.append(i)
 
         return array
-
 
     def isPowerOfTwo(self, n):
         cnt = 0
