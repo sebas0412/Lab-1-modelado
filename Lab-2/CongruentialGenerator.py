@@ -1,8 +1,23 @@
 from math import sqrt
 from Card import Card
+import time
+import random
 
 
 ########################### Metodos Principales #############################
+def init(a,b,m):
+    a = a
+    b = b
+    m = m
+    obj = time.gmtime(0)
+    epoch = time.asctime(obj)
+    x = round(time.time()*1000)
+    return x
+
+def seed(s):
+    random.seed(s)
+    print(random.random())
+    return
 
 def good_abm(n):
     m = generate_m(n)
@@ -285,3 +300,4 @@ def isPowerOfTwo(n):
 
 array = [Card(3, 1), Card(3, 1), Card(5, 1), Card(2, 1), Card(1, 1)]
 print(isPair(array))
+seed(init(1,2,3))
