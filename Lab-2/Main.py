@@ -1,7 +1,8 @@
-from CongruentialGenerator import CongruentialGenerator
+import random
 
+randomInit = random.randint(10000000,30000000)
 cg = CongruentialGenerator()
-a, b, m = cg.good_abm(10000000)
-czx = cg.get_period(a, b, m, 12351)
-print(czx)
-print(len(czx))
+a,b,m = cg.good_abm(randomInit)
+seed = cg.seed(cg.generateTime())
+generated = cg.buildGenerator(a,b,m,seed)
+print(m)
