@@ -2,22 +2,25 @@ from math import sqrt
 from Card import Card
 import time
 import random
+import numpy
 
 
 ########################### Metodos Principales #############################
-def init(a,b,m):
+def init(a, b, m):
     a = a
     b = b
     m = m
     obj = time.gmtime(0)
     epoch = time.asctime(obj)
-    x = round(time.time()*1000)
+    x = round(time.time() * 1000)
     return x
+
 
 def seed(s):
     random.seed(s)
     print(random.random())
     return
+
 
 def good_abm(n):
     m = generate_m(n)
@@ -34,10 +37,15 @@ def good_abm(n):
 
     return a, b, m
 
+def compareHands(playerHand, opponentHand):
+    print()
+
+
 # Debe recibir dos arreglos de 5 'cartas' cada uno
 # 'carta' puede hacerse en una clase, para almacenar el valor y el palo de cada carta
 def compare_hands(player, opponent):
     print()
+
 
 ####################### Metodos Para Texas Hold'em #########################
 # Cada jugador posee 7 cartas en total: 2 privadas y 5 publicas
@@ -59,6 +67,18 @@ def generateAllCards():
     for x in cardDeck:
         print(x)
 
+    return cardDeck
+
+def shuffleArray(array):
+    for i in range(0, 10000):
+        a = random.randint(0, 51)
+        b = random.randint(0, 51)
+        temp = array[a]
+        array[a] = array[b]
+        array[b] = temp
+
+
+
 # Puntaje 9
 def isStraightFlush(playerHand):
     return isStraight(playerHand) and isFlush(playerHand)
@@ -79,6 +99,7 @@ def isFourOfAKind(playerHand):
     else:
         return False
 
+
 # Puntaje 7
 def isFullHouse(playerHand):
     seen = {}
@@ -94,6 +115,7 @@ def isFullHouse(playerHand):
     else:
         return False
 
+
 # Puntaje 6
 def isFlush(playerHand):
     whatType = playerHand[0].type
@@ -103,6 +125,7 @@ def isFlush(playerHand):
             return False
 
     return True
+
 
 # Puntaje 5
 def isStraight(playerHand):
@@ -145,6 +168,7 @@ def isThreeOfAKind(playerHand):
     else:
         return False
 
+
 # Puntaje 3
 def isTwoPairs(playerHand):
     seen = {}
@@ -159,6 +183,7 @@ def isTwoPairs(playerHand):
         return True
     else:
         return False
+
 
 # Puntaje 2
 def isPair(playerHand):
@@ -175,6 +200,7 @@ def isPair(playerHand):
     else:
         return False
 
+
 # Puntaje 1
 # Devuelve la carta con el valor mas alto
 def isHighCard(playerHand):
@@ -184,6 +210,7 @@ def isHighCard(playerHand):
         if x.value > maxValue:
             maxValue = x.value
     return maxValue
+
 
 ########################### Metodos Auxiliares #############################
 
@@ -298,6 +325,3 @@ def isPowerOfTwo(n):
         return 1
     return 0
 
-array = [Card(3, 1), Card(3, 1), Card(5, 1), Card(2, 1), Card(1, 1)]
-print(isPair(array))
-seed(init(1,2,3))
