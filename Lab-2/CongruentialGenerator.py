@@ -7,7 +7,9 @@ import numpy
 
 
 class CongruentialGenerator:
-    a,b,m = 0
+    a = 0
+    b = 0
+    m = 0
     generated = []
     ########################### Metodos Principales #############################
     def __init__(self, a, b, m):
@@ -17,11 +19,11 @@ class CongruentialGenerator:
 
         return
 
-    def generateTime():
+    def generateTime(self):
         obj = time.gmtime(0)
         epoch = time.asctime(obj)
-        time = round(time.time() * 1000)
-        return time
+        x = round(time.time() * 1000)
+        return x
 
     def seed(self, s):
         random.seed(s)
