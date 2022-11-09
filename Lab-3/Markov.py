@@ -26,9 +26,21 @@ class Markov:
 
     def get_sequences(self, words: str, k):
         combined = ""
+        dictionary = {}
         for item in words:
             combined += item
 
+        for index in range(len(combined)):
+
+            try:
+                temp = combined[index : k + index]
+                if len(temp) == k:
+                    dictionary[temp] = temp
+            except:
+                print("")
+
+        resultArray = [x for x in dictionary]
+        resultArray.sort()
         print("")
 
 
