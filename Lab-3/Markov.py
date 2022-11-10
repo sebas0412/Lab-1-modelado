@@ -24,7 +24,7 @@ class Markov:
                 if word != ' ' or '\n' or '\t':
                     self.wordsArray.append(word)
 
-    def add_decorators(self, words: str, decorator: str, n: int):
+    def add_decorators(self, words, decorator, n):
         decor: str = ""
         decoratedWords = []
 
@@ -36,7 +36,7 @@ class Markov:
 
         return decoratedWords
 
-    def get_sequences(self, words: str, k):
+    def get_sequences(self, words, k):
         combined = ""
         dictionary = {}
         for item in words:
@@ -104,7 +104,9 @@ class Markov:
         return counter
 
     def create_model(self, words, ngrams):
-        print("")
+        sequences = self.get_sequences(self.add_decorators(words, "$", 1), ngrams)
+        transitions = self.calculate_transitions(words,sequences)
+        return transitions, sequences
 
     def generate_word(self, model, seed):
         print("")
