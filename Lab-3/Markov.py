@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 
 class Seq:
@@ -110,7 +111,25 @@ class Markov:
         return transitions, sequences
 
     def generate_word(self, model, seed):
-        print("")
+        transitions,sequences = model
+        r = random.Random()
+        r.seed(seed)
+        currentState = 0
+        currentIteration = 0
+        result = ""
+        while True:
+            if currentState == 0 and currentIteration > 0:
+                break
+            currentIteration += 1
+            randomNumber = r.random()
+            for i in range(len(transitions[currentState])):
+                if randomNumber < transitions[currentState][i]:
+                    result += sequences[i]
+                    currentState = i
+                else:
+                    randomNumber -= transitions[currentState][i]
+
+        return result
 
     def get_probability(self, model, word):
         print("")
