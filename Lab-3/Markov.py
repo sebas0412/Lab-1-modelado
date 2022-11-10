@@ -71,20 +71,24 @@ class Markov:
                 entry.amount = 0
 
             for word in words:
-                for char in range(len(word)):
-                    if (word[char] == currentOccurrence):
-                        try:
-                            currentChar = word[char + 1: char + 1 + sequenceSize]
-                            dictionary[self.findDictionaryIndex(currentChar, dictionary)].amount += 1
-                        except:
-                            continue
+                try:
+                    for char in range(len(word)):
+                        if (word[char:char + sequenceSize] == currentOccurrence):
+                            try:
+                                currentChar = word[char + 1: char + 1 + sequenceSize]
+                                dictionary[self.findDictionaryIndex(currentChar, dictionary)].amount += 1
+                            except:
+                                continue
+                except:
+                    continue
 
             total = 0
 
             for entry in dictionary:
                 total += entry.amount
-            for x in range(len(dictionary)):
-                matrix[seq][x] = (1 / total) * dictionary[x].amount
+            if total > 0:
+                for x in range(len(dictionary)):
+                    matrix[seq][x] = (1 / total) * dictionary[x].amount
 
         print("")
         return matrix
