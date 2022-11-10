@@ -1,5 +1,13 @@
 import numpy as np
 
+class Seq:
+    occurrence = ""
+    amount = 0
+
+    def __init__(self, occurrence):
+        self.occurrence = occurrence
+        self.amount = 0
+
 class Markov:
     wordsArray = []
 
@@ -49,22 +57,43 @@ class Markov:
     def calculate_transitions(self, words, sequences):
         matrixSize = len(sequences)
         arr = np.zeros(shape = (matrixSize,matrixSize))
-        arr[4,5] = 8
-        Dict = {}
+        sequenceSize = len(sequences[0])
+        dictionary = []
+
         for item in sequences:
-            Dict[item] = 0
+            dictionary.append(Seq(item))
 
-        for item in Dict:
+        for a in range(len(dictionary)):
+            currentOccurrence = dictionary[a].occurrence
+
+            for entry in dictionary:
+                entry.amount = 0
+
             for word in words:
-                for seq in Dict:
-                    temp = item + seq
-                    if temp in word:
-                        Dict[temp] =  1
-             
-                    
+                for char in range(len(word)):
+                    if (word[char] == currentOccurrence):
+                        try:
+                            currentChar = word[char + 1 : char + 1 + sequenceSize]
+                            dictionary[self.findDictionaryIndex(currentChar, dictionary)].amount += 1
+                        except:
+                            continue
 
-        print(arr)
-        print(Dict)
+            total = 0
+
+            for entry in dictionary:
+                total += entry.amount
+            for x in range(len(dictionary)):
+                arr[a][x] = (1 / total) * dictionary[x].amount
+
+    def findDictionaryIndex(self, entry, dictionary):
+        counter = 0
+
+        for item in dictionary:
+            if item.occurrence == entry:
+                break
+            counter += 1
+
+        return counter
 
     def create_model(self, words, ngrams):
         print("")
