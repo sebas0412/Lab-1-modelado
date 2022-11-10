@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Seq:
     occurrence = ""
     amount = 0
@@ -7,6 +8,7 @@ class Seq:
     def __init__(self, occurrence):
         self.occurrence = occurrence
         self.amount = 0
+
 
 class Markov:
     wordsArray = []
@@ -35,7 +37,7 @@ class Markov:
         return decoratedWords
 
     def get_sequences(self, words: str, k):
-        combined = ""   
+        combined = ""
         dictionary = {}
         for item in words:
             combined += item
@@ -43,7 +45,7 @@ class Markov:
         for index in range(len(combined)):
 
             try:
-                temp = combined[index : k + index]
+                temp = combined[index: k + index]
                 if len(temp) == k:
                     dictionary[temp] = temp
             except:
@@ -53,18 +55,17 @@ class Markov:
         resultArray.sort()
         return resultArray
 
-
     def calculate_transitions(self, words, sequences):
         matrixSize = len(sequences)
-        arr = np.zeros(shape = (matrixSize,matrixSize))
+        matrix = np.zeros(shape=(matrixSize, matrixSize))
         sequenceSize = len(sequences[0])
         dictionary = []
 
         for item in sequences:
             dictionary.append(Seq(item))
 
-        for a in range(len(dictionary)):
-            currentOccurrence = dictionary[a].occurrence
+        for seq in range(len(dictionary)):
+            currentOccurrence = dictionary[seq].occurrence
 
             for entry in dictionary:
                 entry.amount = 0
@@ -73,7 +74,7 @@ class Markov:
                 for char in range(len(word)):
                     if (word[char] == currentOccurrence):
                         try:
-                            currentChar = word[char + 1 : char + 1 + sequenceSize]
+                            currentChar = word[char + 1: char + 1 + sequenceSize]
                             dictionary[self.findDictionaryIndex(currentChar, dictionary)].amount += 1
                         except:
                             continue
@@ -83,7 +84,10 @@ class Markov:
             for entry in dictionary:
                 total += entry.amount
             for x in range(len(dictionary)):
-                arr[a][x] = (1 / total) * dictionary[x].amount
+                matrix[seq][x] = (1 / total) * dictionary[x].amount
+
+        print("")
+        return matrix
 
     def findDictionaryIndex(self, entry, dictionary):
         counter = 0
