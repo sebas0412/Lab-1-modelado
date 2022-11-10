@@ -104,8 +104,9 @@ class Markov:
         return counter
 
     def create_model(self, words, ngrams):
-        sequences = self.get_sequences(self.add_decorators(words, "$", 1), ngrams)
-        transitions = self.calculate_transitions(words,sequences)
+        decorators = self.add_decorators(words, "$", 1)
+        sequences = self.get_sequences(decorators, ngrams)
+        transitions = self.calculate_transitions(decorators, sequences)
         return transitions, sequences
 
     def generate_word(self, model, seed):
