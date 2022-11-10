@@ -1,3 +1,5 @@
+import numpy as np
+
 class Markov:
     wordsArray = []
 
@@ -25,7 +27,7 @@ class Markov:
         return decoratedWords
 
     def get_sequences(self, words: str, k):
-        combined = ""
+        combined = ""   
         dictionary = {}
         for item in words:
             combined += item
@@ -41,13 +43,28 @@ class Markov:
 
         resultArray = [x for x in dictionary]
         resultArray.sort()
-        print("")
-
-
+        return resultArray
 
 
     def calculate_transitions(self, words, sequences):
-        print("")
+        matrixSize = len(sequences)
+        arr = np.zeros(shape = (matrixSize,matrixSize))
+        arr[4,5] = 8
+        Dict = {}
+        for item in sequences:
+            Dict[item] = 0
+
+        for item in Dict:
+            for word in words:
+                for seq in Dict:
+                    temp = item + seq
+                    if temp in word:
+                        Dict[temp] =  1
+             
+                    
+
+        print(arr)
+        print(Dict)
 
     def create_model(self, words, ngrams):
         print("")
