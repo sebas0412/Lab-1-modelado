@@ -15,8 +15,8 @@ markov = Markov()
 # Semilla 142, con secuencia tamano 1
 markov.load_words("pokemon.csv")
 model = markov.create_model(markov.wordsArray, 1)
-print(markov.generate_word(model, 142))
-# print(markov.get_probability(model, "mew"))
+# print(markov.generate_word(model, 142))
+print(markov.get_probability(model, "mew"))
 ##print(transition, sequences)
 
 # Nombre que no tiene sentido

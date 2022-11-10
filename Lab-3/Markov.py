@@ -49,19 +49,16 @@ class Markov:
         return decoratedWord
 
     def get_sequences(self, words, k):
-        combined = ""
         dictionary = {}
         for item in words:
-            combined += item
+            for index in range(len(item)):
 
-        for index in range(len(combined)):
-
-            try:
-                temp = combined[index: k + index]
-                if len(temp) == k:
-                    dictionary[temp] = temp
-            except:
-                print("")
+                try:
+                    temp = item[index: k + index]
+                    if len(temp) == k:
+                        dictionary[temp] = temp
+                except:
+                    print("")
 
         resultArray = [x for x in dictionary]
         resultArray.sort()
@@ -87,7 +84,7 @@ class Markov:
                     for char in range(len(word)):
                         if (word[char:char + sequenceSize] == currentOccurrence):
                             try:
-                                currentChar = word[char + 1: char + 1 + sequenceSize]
+                                currentChar = word[char + sequenceSize: char + sequenceSize * 2]
                                 dictionary[self.findDictionaryIndex(currentChar, dictionary)].amount += 1
                             except:
                                 continue
@@ -155,14 +152,13 @@ class Markov:
 
     def get_probability(self, model, word:str):
         transitions, sequences = model
-        multResult = transitions
+        multResult = np.zeros(len(transitions))
+        multResult[0] = 1
         probabilitiesArray = []
         sequenceSize = len(sequences[0])
 
-        for i in range(100):
+        for i in range(10):
             multResult = np.matmul(multResult, transitions)
-
-        result = multResult[0]
         lowerWord = word.lower()
         decoratedWord = lowerWord
         # decoratedWord = self.add_decorators_string(lowerWord, '$', 1)
@@ -170,7 +166,7 @@ class Markov:
         for k in range(len(decoratedWord)):
             try:
                 currentSequence = decoratedWord[k:k + sequenceSize]
-                probabilitiesArray.append(result[self.findSequenceIndex(currentSequence, sequences)])
+                probabilitiesArray.append(multResult[self.findSequenceIndex(currentSequence, sequences)])
             except:
                 continue
 
