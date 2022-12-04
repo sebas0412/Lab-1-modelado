@@ -13,15 +13,12 @@ def degenerate(lambd):
 
 def markovian(lambd):
     x = random.rand()
-
-    if lambd == 0:
-        lambd = x
     exponential = (-(np.log(1 - x))) / lambd
     return exponential
 
 
 def calcularLambda(n: int):
-    return 64 - n ** 1.5
+    return 64 - n ** 1.5 + 1
 
 
 def calcularMu(n: int):
@@ -46,12 +43,14 @@ class Server:
     clienteSiendoAtendido: Client
     servidorOcupado: bool
     offtime: float
+    acumuladorServidor: float
     serverQueue = []
 
     def __init__(self, queue):
         self.servidorOcupado = False
         self.offtime = 0
         self.serverQueue = queue
+        self.acumuladorServidor = 0.0
         self.clienteSiendoAtendido = Client()
 
     def __str__(self):
@@ -66,13 +65,12 @@ class Queue:
     service: str  # Distribucion tiempo de salida
     mu: float  # Tasa de servicio de clientes dado N
     contador: int
-    contadorServidor: int
     clientesServidos: int
     clientesPerdidos: int
     esperaPromedioCola: float
     esperaPromedioClientes: float
     promedioTiempoOcioso: float
-    clientesActualmenteEnSistema: float
+    clientesActualmenteEnSistema: int
     tasaLlegada: float
     tasaSalida: float
 
@@ -88,13 +86,12 @@ class Queue:
         self.service = service
         self.contador = 0
         self.totalClientesGenerados = 0
-        self.contadorServidor = 0
         self.clientesPerdidos = 0
         self.clientesServidos = 0
         self.esperaPromedioClientes = 0.0
         self.esperaPromedioCola = 0.0
         self.promedioTiempoOcioso = 0.0
-        self.clientesActualmenteEnSistema = 0.0
+        self.clientesActualmenteEnSistema = 0
         self.tasaLlegada = 0.0
         self.tasaSalida = 0.0
         for i in range(s):
@@ -102,70 +99,72 @@ class Queue:
 
     def simulation(self, time_limit, initial_clients, maximum_arrivals):
         unlimited: bool
-        if (maximum_arrivals == 0):
+        contadorLlegada = 0
+        contadorSalida = 0
+        acumuladorClientes = 0
+
+        if maximum_arrivals == 0:
             unlimited = True
         else:
             unlimited = False
 
         for i in range(initial_clients):
-            self.queue.append(Client())
+            cliente = Client()
+            cliente.horaLlegada = 0
+            self.queue.append(cliente)
             self.clientesActualmenteEnSistema += 1
 
         while self.contador < time_limit:
-            if unlimited == False and self.totalClientesGenerados >= maximum_arrivals:
+            if self.totalClientesGenerados > maximum_arrivals and unlimited == False:
                 break
 
             if self.arrival == "Exponential":
-                tasaLlegada = markovian(calcularLambda(self.clientesActualmenteEnSistema))
-            elif self.arrival == "Degenerate":
-                tasaLlegada = degenerate(calcularLambda(self.clientesActualmenteEnSistema))
+                contadorLlegada += markovian(calcularLambda(self.clientesActualmenteEnSistema))
+            else:
+                contadorLlegada += degenerate(calcularLambda(self.clientesActualmenteEnSistema))
 
-            if self.arrival == "Exponential":
-                tasaSalida = markovian(calcularMu(self.clientesActualmenteEnSistema))
-            elif self.arrival == "Degenerate":
-                tasaSalida = degenerate(calcularLambda(self.clientesActualmenteEnSistema))
+            acumuladorClientes += contadorLlegada
 
             self.totalClientesGenerados += 1
+            self.contador += contadorLlegada
 
-            if len(self.queue) < self.lmax:
-                self.contador = self.contador + tasaLlegada
+            if len(self.queue) > maximum_arrivals:
+                self.clientesPerdidos += 1
+            else:
                 cliente = Client()
                 cliente.horaLlegada = self.contador
-                self.queue.append(cliente)
+                self.queue.append(Client())
                 self.clientesActualmenteEnSistema += 1
 
-            else:
-                self.clientesPerdidos += 1
-                self.contador = self.contador + tasaLlegada
-
             for servidor in self.servidores:
-                if servidor.servidorOcupado == False:
+                if self.service == "Exponential":
+                    servidor.acumuladorServidor = markovian(calcularMu(self.clientesActualmenteEnSistema))
+                else:
+                    servidor.acumuladorServidor = degenerate(calcularMu(self.clientesActualmenteEnSistema))
+
+                if servidor.servidorOcupado == True:
+                    if servidor.acumuladorServidor <= acumuladorClientes:
+                        servidor.acumuladorServidor = contadorSalida
+                        servidor.cliente.horaSalida = self.contador
+                        acumuladorClientes = 0.0
+                        self.esperaPromedioClientes += (servidor.cliente.horaSalida - servidor.cliente.horaAtencion)
+                        self.clientesActualmenteEnSistema -= 1
+                        servidor.servidorOcupado = False
+                else:
                     if len(self.queue) == 0:
-                        servidor.offtime = servidor.offtime + tasaLlegada
+                        servidor.offtime += contadorLlegada
                     else:
                         servidor.cliente = self.queue.pop()
                         servidor.servidorOcupado = True
                         self.clientesServidos += 1
                         servidor.cliente.horaAtencion = self.contador
-
-                        self.esperaPromedioCola = self.esperaPromedioCola + (
-                                    servidor.cliente.horaAtencion - servidor.cliente.horaLlegada)
-
-                    ##print("No ocupado")
-                else:
-                    if tasaSalida > tasaLlegada:
-                        servidor.cliente.horaSalida = self.contador
-                        self.esperaPromedioClientes = self.esperaPromedioClientes + (
-                                    servidor.cliente.horaSalida - servidor.cliente.horaLlegada)
-                        servidor.servidorOcupado = False
-                        self.clientesActualmenteEnSistema -= 1
-                    ##print("Ocupado")
+                        self.esperaPromedioCola += (servidor.cliente.horaAtencion - servidor.cliente.horaLlegada)
 
         for servidor in self.servidores:
-            self.promedioTiempoOcioso = (self.promedioTiempoOcioso + servidor.offtime) / len(self.servidores)
-
-        self.esperaPromedioCola = self.esperaPromedioCola / self.clientesServidos
-        self.esperaPromedioClientes = self.esperaPromedioClientes / self.clientesServidos
+            self.promedioTiempoOcioso += servidor.offtime
+        self.promedioTiempoOcioso /= 2
+        self.esperaPromedioCola /= self.clientesServidos
+        self.esperaPromedioClientes /= self.clientesServidos
 
         return f"\nTiempo Transcurrido: {self.contador}\n" \
                f"Espera promedio de cola: {self.esperaPromedioCola}\n" \
