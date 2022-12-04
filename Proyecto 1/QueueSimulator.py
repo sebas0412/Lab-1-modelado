@@ -125,7 +125,7 @@ class Queue:
             if self.arrival == "Exponential":
                 contadorLlegada += markovian(calcularLambda(self.clientesActualmenteEnSistema))
             else:
-                contadorLlegada += degenerate(calcularLambda(self.clientesActualmenteEnSistema))
+                contadorLlegada += degenerate(calcularLambda(self.clientesActualmenteEnSistema)) / time_limit
 
             for server in self.servidores:
                 server.acumuladorClientes += contadorLlegada
@@ -149,13 +149,12 @@ class Queue:
                 if self.service == "Exponential":
                     servidor.acumuladorServidor = markovian(calcularMu(self.clientesActualmenteEnSistema))
                 else:
-                    servidor.acumuladorServidor = degenerate(calcularMu(self.clientesActualmenteEnSistema))
+                    servidor.acumuladorServidor = degenerate(calcularMu(self.clientesActualmenteEnSistema)) / time_limit
 
                 if servidor.servidorOcupado == True:
                     if servidor.acumuladorServidor <= servidor.acumuladorClientes:
                         servidor.cliente.horaSalida = self.contador
                         servidor.acumuladorClientes = 0.0
-                        acumuladorClientes = 0.0
                         self.esperaPromedioClientes += (servidor.cliente.horaSalida - servidor.cliente.horaAtencion)
                         self.clientesActualmenteEnSistema -= 1
                         servidor.servidorOcupado = False
@@ -171,7 +170,7 @@ class Queue:
 
         for servidor in self.servidores:
             self.promedioTiempoOcioso += servidor.offtime
-        self.promedioTiempoOcioso /= 2
+        self.promedioTiempoOcioso /= self.s
         self.esperaPromedioCola /= self.clientesServidos
         self.esperaPromedioClientes /= self.clientesServidos
 
@@ -180,7 +179,7 @@ class Queue:
                f"Espera promedio atencion clientes: {self.esperaPromedioClientes}\n" \
                f"Clientes perdidos: {self.clientesPerdidos}\n" \
                f"Clientes servidos: {self.clientesServidos}\n" \
-               f"Clientes totales: {self.totalClientesGenerados}\n" \
+               f"Clientes totales: {self.clientesServidos - self.clientesPerdidos}\n" \
                f"Promedio tiempo ocioso: {self.promedioTiempoOcioso}\n"
 
     def agregarClienteALaCola(self):
@@ -189,5 +188,5 @@ class Queue:
 
 simulacion = Queue(15, 1, "Exponential", calcularLambda(0), "Exponential", calcularMu(0))
 print(simulacion.simulation(1000, 0, 0))
-simulacion = Queue(15, 1, "Degenerate", calcularLambda(0), "Degenerate", calcularMu(0))
+simulacion = Queue(15, 1, "Exponential", calcularLambda(0), "Degenerate", calcularMu(0))
 print(simulacion.simulation(1000, 0, 0))
