@@ -115,15 +115,15 @@ class Queue:
             if unlimited == False and self.totalClientesGenerados >= maximum_arrivals:
                 break
 
-            if self.arrival == "Exponencial":
+            if self.arrival == "Exponential":
                 tasaLlegada = markovian(calcularLambda(self.clientesActualmenteEnSistema))
             elif self.arrival == "Degenerate":
-                tasaLlegada = degenerate(self.lambd)
+                tasaLlegada = degenerate(calcularLambda(self.clientesActualmenteEnSistema))
 
-            if self.arrival == "Exponencial":
+            if self.arrival == "Exponential":
                 tasaSalida = markovian(calcularMu(self.clientesActualmenteEnSistema))
             elif self.arrival == "Degenerate":
-                tasaSalida = degenerate(self.mu)
+                tasaSalida = degenerate(calcularLambda(self.clientesActualmenteEnSistema))
 
             self.totalClientesGenerados += 1
 
@@ -179,5 +179,7 @@ class Queue:
         print()
 
 
-simulacion = Queue(15, 2, "Exponencial", calcularLambda(0), "Exponencial", calcularMu(0))
+simulacion = Queue(15, 2, "Exponential", calcularLambda(0), "Exponential", calcularMu(0))
+print(simulacion.simulation(1000, 0, 0))
+simulacion = Queue(15, 2, "Degenerate", calcularLambda(0), "Degenerate", calcularMu(0))
 print(simulacion.simulation(1000, 0, 0))
