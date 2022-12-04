@@ -43,7 +43,10 @@ class Server:
     clienteSiendoAtendido: Client
     servidorOcupado: bool
     offtime: float
+
     acumuladorServidor: float
+    acumuladorClientes: float
+
     serverQueue = []
 
     def __init__(self, queue):
@@ -51,6 +54,7 @@ class Server:
         self.offtime = 0
         self.serverQueue = queue
         self.acumuladorServidor = 0.0
+        self.acumuladorClientes = 0.0
         self.clienteSiendoAtendido = Client()
 
     def __str__(self):
@@ -123,7 +127,9 @@ class Queue:
             else:
                 contadorLlegada += degenerate(calcularLambda(self.clientesActualmenteEnSistema))
 
-            acumuladorClientes += contadorLlegada
+            for server in self.servidores:
+                server.acumuladorClientes += contadorLlegada
+
 
             self.totalClientesGenerados += 1
             self.contador += contadorLlegada
@@ -137,15 +143,18 @@ class Queue:
                 self.clientesActualmenteEnSistema += 1
 
             for servidor in self.servidores:
+                # 0.14 Mu
+                # 0.18 Lmbda
+
                 if self.service == "Exponential":
                     servidor.acumuladorServidor = markovian(calcularMu(self.clientesActualmenteEnSistema))
                 else:
                     servidor.acumuladorServidor = degenerate(calcularMu(self.clientesActualmenteEnSistema))
 
                 if servidor.servidorOcupado == True:
-                    if servidor.acumuladorServidor <= acumuladorClientes:
-                        servidor.acumuladorServidor = contadorSalida
+                    if servidor.acumuladorServidor <= servidor.acumuladorClientes:
                         servidor.cliente.horaSalida = self.contador
+                        servidor.acumuladorClientes = 0.0
                         acumuladorClientes = 0.0
                         self.esperaPromedioClientes += (servidor.cliente.horaSalida - servidor.cliente.horaAtencion)
                         self.clientesActualmenteEnSistema -= 1
@@ -178,7 +187,7 @@ class Queue:
         print()
 
 
-simulacion = Queue(15, 2, "Exponential", calcularLambda(0), "Exponential", calcularMu(0))
+simulacion = Queue(15, 1, "Exponential", calcularLambda(0), "Exponential", calcularMu(0))
 print(simulacion.simulation(1000, 0, 0))
-simulacion = Queue(15, 2, "Degenerate", calcularLambda(0), "Degenerate", calcularMu(0))
+simulacion = Queue(15, 1, "Degenerate", calcularLambda(0), "Degenerate", calcularMu(0))
 print(simulacion.simulation(1000, 0, 0))
